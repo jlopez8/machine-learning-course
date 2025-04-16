@@ -1,0 +1,15 @@
+Topics
+1. Code Environment Setup
+2. Machine Learning Fundamentals
+	a. introduction to Machine Learning
+	b. Supervised Learning
+	c. Unsupervised Learning
+3. Introduction - Preprocessing and Analysis
+	a. Initial Study of Dataset
+	b. Basic Visualization: Histograms, Violinplots, Heatmaps
+4. Visualization - Principal Component Analysis
+ 	a. Introduction to PCA
+	b. Introduction to Dataset
+	c.  
+
+

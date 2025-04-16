@@ -1,0 +1,31 @@
+# Number of rows to display
+pd.set_options('display.max_rows', 100)
+
+# Summary Stats
+df.describe()
+df.describe(include='all').T
+df.drop(columns=['name', 'data'], inplace=True)
+df.<CAT_VAR>.unique()
+corr = df.corr() # correlation
+
+# ReOrder Columns
+cols = list(df.columns)
+cols.remove(<THIS_COL>)
+cols.inser(<THIS_COL>, 0)
+df = df.reindex(columns=cols
+
+# Visualization
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+df.loc[:, ['x1', 'x2', 'x3'].hist(bins=20, figsize=(10,10))
+
+sns.catplot(data=df, kind='bar', x='x1', y='y1', hue='x2')
+sns.violinplot(data=df, x='x1', y='y1', hue='reponse var/x2', split=True)
+
+mask = np.triu(np.ones_like(corr, d_type=bool) # mask is for missing values
+plt.subplots(figsize=(10,8))
+sns.heatmap(corr, mask=mask, cmap='seismic', center=0, square='True')
+
+ 
+
