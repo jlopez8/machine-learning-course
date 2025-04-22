@@ -67,3 +67,14 @@ sns.pairplot(df, hue="class") # for pairwise comparisons
 # Reading CSV
 df = pd.read_csv(<FILENAME>)
 
+# Regression Models
+
+## Standardization
+from Sklearn.preprocessing import StandardScaler
+df_std[data_columns] = StandardScaler().fit_transform(df[data_columns])
+
+
+## PCA
+from sklearn.decomposition import PCA
+df_pca = PCA().fit(df_std[data_columns]) 
+

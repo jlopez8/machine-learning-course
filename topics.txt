@@ -14,5 +14,5 @@ Topics
  	a. Introduction to PCA
 	b. Introduction to Dataset
 	c. Initial Visualization
-	d. Using PCA
+	d. Using PCA<<
 
