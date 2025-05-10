@@ -15,8 +15,27 @@ Topics
 	b. Introduction to Dataset
 	c. Initial Visualization
 	d. Using PCA
-5.
-6.
-7.
-8. Visualization - ISOMAP
+5. Locally Linear Embedding (LLE)
+	a. Introduction to LLE
+	b. Locally Linear Embedding Algorithm
+	c. Introduction to Dataset
+	d. Using LLE
+	e. LLE with 3 Dimensions
+6. t-Stochastic Neighbor Embedding
+	a. Introduction to t-SNE
+	b. Introduction to the Dataset
+	c. t-SNE on Raw Data
+	d. t-SNE on Scaled Data
+	e. t-SNE on Standardized Data
+7. Multidimensional Scaling (MDS)
+	a. Introduction to MDS
+	b. Using MDS w 2 Dimensions
+	c. Using MDS w 3 Dimensions
+8. ISOMAP
+	a. Introduction to ISOMAP
+	b. ISOMAP w 2 Dimensions
+	c. ISOMAP w 3 Dimensions
+9. Fisher Discriminant Analysis
+	a. Introduction to Fisher Discriminant Analysis
+	b. <<
 
