@@ -5,6 +5,7 @@ from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
 from sklearn.manifold import MDS
 from sklearn.manifold import Isomap
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 import pandas as pd
 
@@ -30,7 +31,7 @@ df_scaled = df.copy(deep=True)
 df_scaled[data_columns] = MinMaxScaler((0,1)).fit_transform(df_scaled[data_columns])
 df_scaled[data_columns] = StandardScaler().fit_transform(df_scaled[data_columns])
 
-# Use thish for PCA. Standardized.
+# Use this for PCA. Standardized.
 df_std[data_columns] = StandardScaler().fit_transform(df[data_columns])
 
 # Perform Dim Redux:
@@ -52,3 +53,6 @@ print("MDS 3D Stress aka MSE:\n", mds.stress_)
 isomap = Isomap(n_components=3, n_neighbors=10)
 df_scaled[["ISOMAP1", "ISOMAP2", "ISOMAP3"]] = isomap().fit_transform(df_scaled[data_columns])
 
+# Note: this requires a standardized dataset.
+fisher = LinearDiscriminantAnalysis(n_components=2)
+df_scaled[["FISH1", "FISH2"]] = fisher.fit_transform(df_std[data_columns].values, y=df_std[<TARGET_REGRESSION_COL>])
