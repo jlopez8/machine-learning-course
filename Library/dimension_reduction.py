@@ -29,10 +29,7 @@ df[<CATVAR1>] + df[<CATVAR2>]
 ## Good for distance-based dim redux.
 df_scaled = df.copy(deep=True)
 df_scaled[data_columns] = MinMaxScaler((0,1)).fit_transform(df_scaled[data_columns])
-df_scaled[data_columns] = StandardScaler().fit_transform(df_scaled[data_columns])
-
-# Use this for PCA. Standardized.
-df_std[data_columns] = StandardScaler().fit_transform(df[data_columns])
+df_std[data_columns] = StandardScaler().fit_transform(df_scaled[data_columns])
 
 # Perform Dim Redux:
 df_pca = PCA().fit(df_std[data_columns]) 
@@ -55,4 +52,4 @@ df_scaled[["ISOMAP1", "ISOMAP2", "ISOMAP3"]] = isomap().fit_transform(df_scaled[
 
 # Note: this requires a standardized dataset.
 fisher = LinearDiscriminantAnalysis(n_components=2)
-df_scaled[["FISH1", "FISH2"]] = fisher.fit_transform(df_std[data_columns].values, y=df_std[<TARGET_REGRESSION_COL>])
+df_std[["FISH1", "FISH2"]] = fisher.fit_transform(df_std[data_columns].values, y=df_std[<TARGET_REGRESSION_COL>])
