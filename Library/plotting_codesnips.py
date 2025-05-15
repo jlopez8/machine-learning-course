@@ -26,6 +26,7 @@ plt.scatter(
 
 # plotly express
 fig = px.scatter_3d(df, x=<C1>, y=<C2>, z=<C3>, color=<CLASS>);
+fig.update_traces(marker_size=<MARKER_SIZE>)
 fig.show()
 
 # Image show
