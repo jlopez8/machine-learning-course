@@ -26,5 +26,11 @@ plt.scatter(
 
 # plotly express
 fig = px.scatter_3d(df, x=<C1>, y=<C2>, z=<C3>, color=<CLASS>);
+fig.update_traces(marker_size=<MARKER_SIZE>)
 fig.show()
 
+# Image show
+# X = samples with raw data / features. each row is an image with 64 "bits" indicating color of an 8x8 image.
+# y = targets / interpretations of each sample.
+plt.imshow(X[0].reshape(8, 8), cmap="Greys")
+print(f"y interpreted value: {y[0]}")

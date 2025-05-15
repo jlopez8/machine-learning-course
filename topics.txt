@@ -40,4 +40,7 @@ Topics
 	b. Introduction to Dataset
 	c. Fisher Discriminant Analysis w 2 Dimensions
 	d. Fisher Discriminant Analysis w 3 Dimensions 
-
+10. Visualization Final Project - Images
+	a. Images
+	b. Introduction to Images Dataset
+	c. Fisher Discriminant Analysis <<
