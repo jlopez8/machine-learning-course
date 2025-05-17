@@ -1,7 +1,7 @@
 import pandas as pd
 
-def get_data(filename, rename_columns={}, remap={}, combinator={}):
-    df = pd.read_csv(filename)
+def get_data(filename, rename_columns={}, remap={}, combinator={}, **kwargs):
+    df = pd.read_csv(filename, index_col=kwargs.get("index_col", None))
 
     # re-format data
     df.rename(columns=rename_columns, inplace=True)
@@ -14,3 +14,8 @@ def get_data(filename, rename_columns={}, remap={}, combinator={}):
         df[combo] = df[columns].sum(axis=1)
 
     return df
+
+def missing_values(df: pd.DataFrame) -> pd.DataFrame:
+    df_clean = df.copy(deep=True)
+
+    return df_clean

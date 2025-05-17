@@ -1,6 +1,10 @@
 # Pandas Set Options
 pd.set_options('display.max_rows', 100)
+pd.set_option("display.max_columns", None) # Displays all columns in pandas dataframe
 pd.set_option("display.precision", 3)
+
+# Reading DataFrame from CSV
+df = pd.read_csv(<FILENAME>)
 
 # Summary Stats
 df.head()
@@ -12,6 +16,17 @@ df.drop(columns=['name', 'data'], inplace=True)
 df.<CAT_VAR>.unique()
 df[<CAT_VAR>].value_counts() # counts how many values this cat var has.
 corr = df.corr() # correlation
+
+# Checking Values
+df.isna().sum().sort_values(ascending=False)
+
+# Categorial Columns / Values
+categorical_columns = list(df.dtypes[df.dtypes == "O"].index.values)
+
+# ReCast non-numerical/object columns as CAT_VARS.
+for column in categorical_columns:
+    df[column] = df[column].astype("category")
+
 
 # ReOrder Columns
 cols = list(df.columns)
@@ -63,9 +78,6 @@ sns.heatmap(corr, mask=mask, cmap='seismic', center=0, square='True')
 
 ## Pairplotting
 sns.pairplot(df, hue="class") # for pairwise comparisons
-
-# Reading CSV
-df = pd.read_csv(<FILENAME>)
 
 # Regression Models
 
