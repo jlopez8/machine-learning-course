@@ -12,7 +12,6 @@ df.tail()
 df.shape
 df.describe()
 df.describe(include='all').T
-df.drop(columns=['name', 'data'], inplace=True)
 df.<CAT_VAR>.unique()
 df[<CAT_VAR>].value_counts() # counts how many values this cat var has.
 corr = df.corr() # correlation
@@ -27,6 +26,11 @@ categorical_columns = list(df.dtypes[df.dtypes == "O"].index.values)
 for column in categorical_columns:
     df[column] = df[column].astype("category")
 
+# Dropping Columns
+df.drop(columns=['name', 'data'], inplace=True)
+
+# Dropping Nans
+df.dropna()
 
 # ReOrder Columns
 cols = list(df.columns)
