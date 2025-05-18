@@ -1,8 +1,11 @@
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression 
 from statsmodels.genmod.generalized_linear_model import GLM
 from statsmodels.api as sm
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import r2_score
 from scipy import stats
 
 
@@ -63,7 +66,6 @@ linear_regression.fit(X_train, y_train)
 
 # Check some early prediction results based on this fit.
 y_verify_pred = pd.DataFrame(linear_regression.predict(X_train))
-
 (y_verify_pred - y_train)[0]
 
 # Accessing weights
@@ -73,11 +75,26 @@ intercept = linear_regression.intercept_
 ## 2. Ordinary Least Squares via  statsmodels package.
 glm = sm.OLS(y_train, sm.add_constant(X_train))
 
-result = glm.fit() # Fit model to the training data provided to the object.
-result.summary() # Show summary statistics of trained model.
+glm_fitted = glm.fit() # Fit model to the training data provided to the object.
+glm_fitted.summary() # Show summary statistics of trained model.
 
 # Verification
 
 # These fits can be verified visually by the histogram techniques as outlined in the 
 # plotting_codesnips.py file in section: ### Verification of ML fits for a linear regression.
 
+# Metrics for Performance
+
+## MSE
+N = X_train.shape[0] # Get from training data rows.
+y_hat = glm_fitted.predict(sm.add_constant(X_train)) # Use OLS fit from stats package.
+mse_stat = ((y_hat - y_train) ** 2).sum()/ N 
+mse_sk = mean_squared_error(y_train, y_hat) # Option: use scikit-learn.
+
+## Normlized MSE. Uses the variance subpackage of numpy.
+sigma = np.var(y_train)
+norm_mse = mse_stat / sigma
+
+## R-Squared
+R_squared = 1 - norm_mse
+R_squared_sk = r2_score(y_train, y_hat) # Option: use scikit-learn
