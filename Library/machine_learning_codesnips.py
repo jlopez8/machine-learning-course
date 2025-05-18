@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import KFold
 from sklearn.linear_model import LinearRegression 
 from statsmodels.genmod.generalized_linear_model import GLM
 from statsmodels.api as sm
@@ -98,3 +99,42 @@ norm_mse = mse_stat / sigma
 ## R-Squared
 R_squared = 1 - norm_mse
 R_squared_sk = r2_score(y_train, y_hat) # Option: use scikit-learn
+
+
+# K Fold Cross Validation
+cross_validation_metrics = pd.DataFrame(columns=["MSE", "norm_MSE", "R2"])
+
+# Instantiate a KFold object with 5 splits.
+# This really only contains information about INDICES of the folds, not the DATA itself, you have to 
+# call in the data using the index information provided by the KFold split. These will all come
+# from the X_train data set, NOT THE TEST DATASET!! Rememember, that is not used until the final
+# verification. 
+kfold = KFold(n_splits=5)
+
+# Perform the k-fold fitting on each of the folds. This retains the MSE statistics per fold.
+i = 1
+for train_index, test_index in kfold.split(X_train):
+    print(f"Split: {i}\n\tTest folds: {i}\n\tTrain folds: {[j for j in range(1, kfold.n_splits + 1) if j != i]}")
+
+    # Get the kfold data.
+    x_train_fold = X_train.values[train_index]
+    y_train_fold = y_train.values[train_index]
+    x_test_fold = X_train.values[test_index, :]
+    y_test_fold = y_train.values[test_index]
+
+    # Perform model regression with KFold data.
+    linear_regression = LinearRegression().fit(x_train_fold, y_train_fold)
+    y_hat_fold = linear_regression.predict(x_test_fold)
+
+    # Calculate Metrics of Performance
+    mse_fold = mean_squared_error(y_test_fold, y_hat_fold)
+    normalized_mse_fold = 1 - r2_score(y_test_fold, y_hat_fold)
+    r2_fold = r2_score(y_test_fold, y_hat_fold)
+    print(f"\tMSE: {mse_fold: 3.3f} normalized_MSE: {normalized_mse_fold: 3.3f} R2: {r2_fold: 3.3f}")
+
+    # Store Cross Validation Metrics
+    cross_validation_metrics.loc[f"Fold {i}", :] = [mse_fold, normalized_mse_fold, r2_fold]
+    i+=1
+
+# Adds mean of each column in the metrics dataframe tracker.
+cross_validation_metrics.loc["Mean", :] = cross_validation_metrics.mean()
