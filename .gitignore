@@ -1,3 +1,11 @@
 
 # MAC OS
 *.DS_Store*
+
+# SWAP
+*.swp*
+
+# Cache
+*cache*
+
+

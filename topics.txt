@@ -43,4 +43,12 @@ Topics
 10. Visualization Final Project - Images
 	a. Images
 	b. Introduction to Images Dataset
-	c. Fisher Discriminant Analysis <<
+	c. Fisher Discriminant Analysis
+	d. Locally Linear Embedding
+	e. Principal Component Analysis
+	f. ISOMAP
+11. Linear Regression
+	a. Introduction to Dataset
+	b. Preprocessing
+	c. Linear Regression
+	d.  
