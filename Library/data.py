@@ -17,7 +17,7 @@ def get_data(filename, rename_columns={}, remap={}, combinator={}, **kwargs):
 
 def remove_missing_and_nonNumerical_values(X, y):
     """
-    Removes missing and non-numerical values from dataframe 'X' and corresponding reponse variable y. 
+    Removes missing and non-numerical values from dataframe 'X' and CORRESPONDING rows from reponse variable y. 
     Prints minor statistics such as original shapes, categorical variables removed, and new sizes.
 
     Parameters
