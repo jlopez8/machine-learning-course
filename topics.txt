@@ -51,4 +51,7 @@ Topics
 	a. Introduction to Dataset
 	b. Preprocessing
 	c. Linear Regression
-	d.  
+	d. Metrics
+	e. Cross Validation
+12. Ridge Regression
+	a. Ridge Regression 
