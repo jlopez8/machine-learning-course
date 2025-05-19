@@ -54,4 +54,6 @@ Topics
 	d. Metrics
 	e. Cross Validation
 12. Ridge Regression
-	a. Ridge Regression 
+	a. Ridge Regression
+13. Lasso Regression
+	a. Lasso Regression 
