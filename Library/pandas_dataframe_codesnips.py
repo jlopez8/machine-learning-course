@@ -26,6 +26,12 @@ categorical_columns = list(df.dtypes[df.dtypes == "O"].index.values)
 for column in categorical_columns:
     df[column] = df[column].astype("category")
 
+# Adding a row:
+df.loc[<ROW_NAME>] = <ARRAY_LIKE>
+
+# Adding a column:
+df[<COL_NAME>] = <ARRAY_LIKE>
+
 # Dropping Columns
 df.drop(columns=['name', 'data'], inplace=True)
 

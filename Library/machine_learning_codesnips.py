@@ -3,6 +3,8 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
 from sklearn.linear_model import LinearRegression 
+from sklearn.linear_model import Ridge
+from sklearn.linear_model import RidgeCV
 from statsmodels.genmod.generalized_linear_model import GLM
 from statsmodels.api as sm
 from sklearn.metrics import mean_squared_error
@@ -12,7 +14,7 @@ from scipy import stats
 
 df = pd.DataFrame(<FILENAME>)
 
-# Methods
+# Custom Methods
 def remove_missing_and_nonNumerical_values(X, y):
     """
     Removes missing and non-numerical values from dataframe 'X' and corresponding reponse variable y. 
@@ -102,6 +104,8 @@ R_squared_sk = r2_score(y_train, y_hat) # Option: use scikit-learn
 
 
 # K Fold Cross Validation
+
+## As applied with an OLS model
 cross_validation_metrics = pd.DataFrame(columns=["MSE", "norm_MSE", "R2"])
 
 # Instantiate a KFold object with 5 splits.
@@ -119,7 +123,7 @@ for train_index, test_index in kfold.split(X_train):
     # Get the kfold data.
     x_train_fold = X_train.values[train_index]
     y_train_fold = y_train.values[train_index]
-    x_test_fold = X_train.values[test_index, :]
+    x_test_fold = X_train.values[test_index]
     y_test_fold = y_train.values[test_index]
 
     # Perform model regression with KFold data.
@@ -138,3 +142,60 @@ for train_index, test_index in kfold.split(X_train):
 
 # Adds mean of each column in the metrics dataframe tracker.
 cross_validation_metrics.loc["Mean", :] = cross_validation_metrics.mean()
+
+
+## As Applied with Ridge Regression
+
+# Track the ridge cross validation
+ridge_cross_validation_metrics = pd.DataFrame(columns=["mean MSE", "mean norm MSE", "mean R2"])
+lambdas = [1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1, 10, 50, 100]
+
+# Calculate Cross validation for each lambda.
+for lambda_ in lambdas:
+    k_fold = KFOLD(n_splits=5)
+
+    cv_mse = []
+    cv_norm_mse = []
+    cv_r2 = []
+
+    # Calculat the metric for each partition and take the mean.
+    i = 1
+    for train_index, test_index in k_fold.split(X_train):
+        # option to print the test fold data
+        # print(f"Lambda: {lambda)}: Split: {i}\n\tTest folds: {i}\n\tTrain folds: {[j for j in range(1, k_fold.n_splits + 1) if j != 1]}")
+
+        x_train_fold = X_train.values[train_index]
+        y_train_fold = y_train.values[train_index]
+        x_test_fold = X_train.values[test_index]
+        y_test_fold = y_train.values[test_index]
+
+        # Perform the model regression w kfold data.
+        ridge_reg = Ridge(alpha=lambda_).fit(x_train_fold, y_train_fold)
+        y_hat_fold = ridge_reg.predict(x_test_fold)
+
+        # Calculate the metrics of performance.
+        mse_fold = mean_squared_error(y_test_fold, y_hat_fold)
+        r2_fold = r2_score(y_test_fold, y_hat_fold)
+        norm_mse_fold = 1 - r2_fold
+        print(f"MSE fold: {mse_fold: 3.3f} Norm MSE fold: {norm_mse_fold: 3.3f} R2 fold: {r2_fold: 3.3f}")
+
+        # Capture the values of cross validation at the specific fold.
+        # These are used later to calculate a mean.
+        cv_mse.append(mse_fold)
+        cv_norm_mse.append(norm_mse_fold)
+        cv_r2.append(r2_fold)
+
+    # Calculate the mean of the cross validation metrics at this lambda. Store in the row of the validation metrics df.
+    ridge_cross_validation_metrics.loc[f"lambda: {lambda_}"] = [np.mean(cv_mse), np.mean(cv_norm_mse), np.mean(cv_r2)]
+
+# Now display and sort by best R2 fit.
+ridge_cross_validation_metrics.sort(by="mean R2", ascending=False)
+
+## As Applied using Ridge Regression Scikit-learn pre-built library
+lambdas = [1e-4, 1e-3, 1e-2, 0.1, 0.5, 1, 10, 50, 100]
+# NOTE: fit directly on the training data because it will perform the folding for us.
+ridge_cv = RidgeCV(alphas=lambdas, cv=5).fit(X_train, y_train)
+
+# Alpha Selection for Ridge Regression Cross Validation
+# See plotting codesnips for more using Alpha Selection.
+

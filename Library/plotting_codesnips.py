@@ -4,7 +4,7 @@ import plotly.express as px
 import statsmodels.api as sm
 from yellowbrick.regressor import residuals_plot
 from yellowbrick.regressor import prediction_error
-
+from yellowbrick.regressor import AlphaSelection
 
 # Figures and Subplots
 fig = plt.figure(figsize=(8, 8/1.618))
@@ -36,6 +36,7 @@ fig.update_traces(marker_size=<MARKER_SIZE>)
 fig.show()
 
 # Image show
+# NOTE: for showing mages. 
 # X = samples with raw data / features. each row is an image with 64 "bits" indicating color of an 8x8 image.
 # y = targets / interpretations of each sample.
 plt.imshow(X[0].reshape(8, 8), cmap="Greys")
@@ -97,12 +98,15 @@ sns.heatmap(corr, mask=mask, cmap='seismic', center=0, square='True')
 ## Pairplotting
 sns.pairplot(df, hue="class") # for pairwise comparisons
 
-## QQ Plots
-### Verification of ML fits for a linear regression.
-plt.figure(figsize=(8, 8 / 1.618))
+## Verification of ML fits for a linear regression.
+## Uses yellowbrick.
+### QQ Plots
 visualizer = residuals_plot(linear_regression, X_train, y_train, X_test, y_test, is_fitted=True, qqplot=True, hist=False)
 plt.show()
 
-### y_hat vs y_test
-plt.figure(figsize=(8, 8 / 1.618));
+### y_hat vs y_test 
 visualizer = prediction_error(linear_regression, X_test, y_test, is_fitted=True)
+
+### Ridge Regression with Cross Validation
+visualization = AlphaSelection(RidgeCV(alphas=lambdas))
+visualization.fit(X_train, y_train)
