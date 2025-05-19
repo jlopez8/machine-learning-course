@@ -2,9 +2,12 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
+from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import LinearRegression 
 from sklearn.linear_model import Ridge
 from sklearn.linear_model import RidgeCV
+from sklearn.linear_model import Lasso
+from sklearn.linear_model import LassoCV
 from statsmodels.genmod.generalized_linear_model import GLM
 from statsmodels.api as sm
 from sklearn.metrics import mean_squared_error
@@ -51,6 +54,9 @@ X = df.loc[:, df.columns != <RESPONSE_COL>]
 
 ## Now assign response variable only.
 y = df.loc[:, df.columns == <RESPONSE_COL>]
+
+# Remove missing and categorical/nonnumerical values
+X, y = data.remove_missing_and_nonNumerical_values(X, y)
 
 ## Train/Test Data Split
 # 67% / 33% SPLIT
@@ -102,8 +108,9 @@ norm_mse = mse_stat / sigma
 R_squared = 1 - norm_mse
 R_squared_sk = r2_score(y_train, y_hat) # Option: use scikit-learn
 
-
+######################
 # K Fold Cross Validation
+######################
 
 ## As applied with an OLS model
 cross_validation_metrics = pd.DataFrame(columns=["MSE", "norm_MSE", "R2"])
@@ -198,4 +205,68 @@ ridge_cv = RidgeCV(alphas=lambdas, cv=5).fit(X_train, y_train)
 
 # Alpha Selection for Ridge Regression Cross Validation
 # See plotting codesnips for more using Alpha Selection.
+
+
+## As Applied using Lasso Regression
+
+# set-up the lambdas. 
+lambdas = [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1, 10, 50, 100]
+lasso_cross_validation_metrics = pd.DataFrame(columns=["mean_mse", "mean_norm_mse", "mean_r2"])
+
+# Cross validation for each lambda
+for lambda_ in lambdas:
+
+    # Set-up the cross validation metric storage arrays. These are used per fold.
+    cv_mse = []
+    cv_norm_mse = []
+    cv_r2 = []
+
+    kfold = KFold(n_splits=5)
+    # i = 1 # This is for printing statistics per fold.
+    for train_index, test_index in kfold.split(X_train):
+
+        # Get train and test data for this fold.
+        x_train_fold = X_train.values[train_index]
+        y_train_fold = y_train.values[train_index]
+        x_test_fold = X_train.values[test_index]
+        y_test_fold = y_train.values[test_index]
+
+        # Fit the model to this fold.
+        lasso_model = Lasso(alpha=lambda_)
+        lasso_model.fit(x_train_fold, y_train_fold)
+
+        # Get the prediction data.
+        y_hat_fold = lasso_model.predict(x_test_fold)
+
+        # Compute performance metrics.
+        mse_fold = mean_squared_error(y_test_fold, y_hat_fold)
+        r2_fold = r2_score(y_test_fold, y_hat_fold)
+        norm_mse_fold = 1 - r2_fold
+
+        # Store performance metrics.
+        cv_mse.append(mse_fold)
+        cv_norm_mse.append(norm_mse_fold)
+        cv_r2.append(r2_fold)
+
+    # Compute and store mean of performance metrics.
+    lasso_cross_validation_metrics.loc[f"Lambda: {lambda_}"] = [np.mean(cv_mse), np.mean(cv_norm_mse), np.mean(cv_r2)]
+
+# Display and sort by best fit
+lasso_cross_validation_metrics.sort_values(by="mean_r2", ascending=False)
+
+## As Applied using Lasso Regression Scikit-learn pre-built library
+lambdas = [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1, 10, 50, 100]
+lasso_cv = LassoCV(alphas=lambdas)
+lasso_cv.fit(X_train, y_train)
+
+# NOTE: this is slightly different for lasso versus ridge. 
+# You have to compute this. It is not done automatically like in Ridge.
+# This essentially performs the same process AGAIN, but focusing on the score.
+kfold = KFold(n_splits=5)
+lasso_r2 = np.mean(cross_val_score(lasso_cv, X_train, y_train, cv=kfold))
+print(f"Best Lambda: {lasso_cv.alpha_: 3.3f} R2_score: {lasso_r2: 3.3f}")
+
+# Alpha Selection for Lasso Regression Cross Validation
+# See plotting codesnips for more using Alpha Selection.
+
 

@@ -107,6 +107,7 @@ plt.show()
 ### y_hat vs y_test 
 visualizer = prediction_error(linear_regression, X_test, y_test, is_fitted=True)
 
-### Ridge Regression with Cross Validation
+### Ridge Regression Lasso Regression with Cross Validation
 visualization = AlphaSelection(RidgeCV(alphas=lambdas))
+visualization = AlphaSelection(LassoCV(alphas=lambdas))
 visualization.fit(X_train, y_train)
