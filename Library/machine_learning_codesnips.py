@@ -269,4 +269,3 @@ print(f"Best Lambda: {lasso_cv.alpha_: 3.3f} R2_score: {lasso_r2: 3.3f}")
 # Alpha Selection for Lasso Regression Cross Validation
 # See plotting codesnips for more using Alpha Selection.
 
-

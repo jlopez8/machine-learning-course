@@ -63,6 +63,7 @@ def save_weights(weights, filename) -> None:
         csv_writer = csv.writer(file)
         for w in weights:
             csv_writer.writerow([w])
+    print(f"Weights saved here:\n{filename}")
     return 
 
 def load_weights(filename) -> list:
