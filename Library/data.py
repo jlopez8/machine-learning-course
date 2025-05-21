@@ -1,19 +1,21 @@
+# data.py
+# Class for handling data in preprocessing, storing, and retrieving. 
+
 import pandas as pd
 import csv
+from sklearn.preprocessing import MinMaxScaler
 
 def get_data(filename, rename_columns={}, remap={}, combinator={}, **kwargs):
     df = pd.read_csv(filename, index_col=kwargs.get("index_col", None))
-
-    # re-format data
     df.rename(columns=rename_columns, inplace=True)
 
-    # remap cat var designator
+    # Remap values using cat map.
     for column, col_map in remap.items():
         df[column] = df[column].map(col_map)
 
+    # Creates a custom sum-wise combination of specific columns.
     for combo, columns in combinator.items():
         df[combo] = df[columns].sum(axis=1)
-
     return df
 
 def remove_missing_and_nonNumerical_values(X, y):
@@ -45,6 +47,29 @@ def remove_missing_and_nonNumerical_values(X, y):
     y = y[X.index]
     print(f"New Size X: {X.shape} y: {y.shape}")
     return X, y
+
+def scale_data(X, y, scaler=None):
+    """
+    Scales data according to specified scaler. If None, will start and use a new scaler: MinMaxScaler.
+    Missing and non-numerical values are dropped during this process. 
+
+    Parameters
+    -------
+    X (pd.DataFrame): Dataframe of features. 
+    y (pd.DataFrame): Dataframe of respones.
+    scaler (scaler): Optional. Scaler from scikitlearn.preprocessing._data library. Default is MinMaxScaler.
+
+    Returns
+    -------
+    X (pd.DataFrame): Dataframe of rescaled features. 
+    y (pd.DataFrame): Dataframe of rescaled responses.
+    scaler (scaler): Scaler used in the scaling process.
+    """
+    if not scaler:
+        scaler = MinMaxScaler()
+    X, y = remove_missing_and_nonNumerical_values(X, y)
+    X[X.columns] = scaler.fit_transform(X[X.columns])
+    return X, y, scaler
 
 def save_weights(weights, filename) -> None:
     """

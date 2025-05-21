@@ -13,40 +13,17 @@ from statsmodels.api as sm
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
 from scipy import stats
+from Library import data # This is a custom library.
 
-
+######### 
+# Data: Retrieve
+#########
 df = pd.DataFrame(<FILENAME>)
+df = data.get(<FILENAME>)
 
-# Custom Methods
-def remove_missing_and_nonNumerical_values(X, y):
-    """
-    Removes missing and non-numerical values from dataframe 'X' and corresponding reponse variable y. 
-    Prints minor statistics such as original shapes, categorical variables removed, and new sizes.
-
-    Parameters
-    ------
-    X (pd.DataFrame): Original dataframe. Numerical and non-numerical datatypes must be pre-assigned as 
-    numerical type and category.
-    y (pd.DataFrame): Original response variable.
-
-    Returns
-    ------
-    X (pd.DataFrame): Reduced dataframe with non nans or categorical column variables.
-    y (pd.DataFrame): Reduced response variable matching corresponding rows of reduced dataframe 'X'.
-    """
-    print(f"Original Size X: {X.shape} y: {y.shape}")
-
-    # Drop Categorical Values. Nonnumerical Dtypes must be 
-    categorical_columns = X.dtypes[X.dtypes=="category"].index.values
-    X = X.drop(columns=categorical_columns)
-    print("Removed {}".format(categorical_columns))
-
-    # Drop Missing Values.
-    X = X.dropna()
-    # Make sure you reduce y as well, since the above is a row-reduction technique.
-    y = y[X.index]
-    print(f"New Size X: {X.shape} y: {y.shape}")
-    return X, y
+#########
+# Data: Train, Test, Split
+#########
 
 # Separate into features and response variables.
 ## Take everything except the response var.
@@ -55,15 +32,28 @@ X = df.loc[:, df.columns != <RESPONSE_COL>]
 ## Now assign response variable only.
 y = df.loc[:, df.columns == <RESPONSE_COL>]
 
-# Remove missing and categorical/nonnumerical values
-X, y = data.remove_missing_and_nonNumerical_values(X, y)
-
 ## Train/Test Data Split
 # 67% / 33% SPLIT
 # Random state is for seeding a partition. 0 - 42 are common seeds.
-X_train, X_test, y_train, y_text = train_test_split(X, y, test_size= 0.33, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size= 0.33, random_state=42)
 
-# Training
+#########
+# Data: Remove missing, nonnumerical, and scale data.
+#########
+# Remove missing and categorical/nonnumerical values
+X_train, y_train = data.remove_missing_and_nonNumerical_values(X_train, y_train)
+X_test, y_test = data.remove_missing_and_nonNumerical_values(X_test, y_test)
+
+# Scale
+X_train, y_trian, scaler = data.scale_data(X_train, y_train)
+X_test, y_test, _ = data.scale_data(X_test, y_test, scaler=scaler)
+
+
+##########
+# Model Training
+##########
+
+#NOTE: it is generally good to have scaled data for this phase of the processes.
 
 ## 1. Linear Regression
 # Get the model. 
@@ -268,4 +258,3 @@ print(f"Best Lambda: {lasso_cv.alpha_: 3.3f} R2_score: {lasso_r2: 3.3f}")
 
 # Alpha Selection for Lasso Regression Cross Validation
 # See plotting codesnips for more using Alpha Selection.
-
