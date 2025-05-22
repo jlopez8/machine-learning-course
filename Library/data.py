@@ -71,6 +71,27 @@ def scale_data(X, y, scaler=None):
     X[X.columns] = scaler.fit_transform(X[X.columns])
     return X, y, scaler
 
+def one_hot_encoding(X: pd.DataFrame):
+    """
+    Takes dataframe X and returns one-hot encoded dataframe.
+
+    Parameters
+    ------
+    X (pd.DataFrame): Original dataframe. Numerical and non-numerical datatypes must be pre-assigned as 
+    numerical type and category.
+    y (pd.DataFrame): Original response variable.
+
+    Returns
+    ------
+    X (pd.DataFrame): One-hot encoded dataframe.
+    """
+    categorical_columns = list(X.dtypes[X.dtypes == "category"].index.values)
+    for column in categorical_columns:
+        X_one_hot = pd.get_dummies(X[column], prefix=column)
+        X = X.merge(X_one_hot, left_index=True, right_index=True)
+    X.drop(columns=categorical_columns, inplace=True)
+    return X
+
 def save_weights(weights, filename) -> None:
     """
     Save weights from a model regression. 
