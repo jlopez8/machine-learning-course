@@ -2,6 +2,7 @@
 # Class for handling data in preprocessing, storing, and retrieving. 
 
 import pandas as pd
+from pandas import DataFrame
 import csv
 from sklearn.preprocessing import MinMaxScaler
 
@@ -36,7 +37,7 @@ def remove_missing_and_nonNumerical_values(X, y):
     """
     print(f"Original Size X: {X.shape} y: {y.shape}")
 
-    # Drop Categorical Values. Nonnumerical Dtypes must be 
+    # Drop Categorical Values. Nonnumerical dtypes must be identified as 'category'.
     categorical_columns = X.dtypes[X.dtypes=="category"].index.values
     X = X.drop(columns=categorical_columns)
     print("Removed {}".format(categorical_columns))
@@ -71,26 +72,43 @@ def scale_data(X, y, scaler=None):
     X[X.columns] = scaler.fit_transform(X[X.columns])
     return X, y, scaler
 
-def one_hot_encoding(X: pd.DataFrame):
+def one_hot_encoding_preprocessing(X: DataFrame, y:DataFrame, scaler=None) -> DataFrame:
     """
     Takes dataframe X and returns one-hot encoded dataframe.
 
     Parameters
     ------
-    X (pd.DataFrame): Original dataframe. Numerical and non-numerical datatypes must be pre-assigned as 
+    X (DataFrame): Original dataframe. Numerical and non-numerical datatypes must be pre-assigned as 
     numerical type and category.
-    y (pd.DataFrame): Original response variable.
+    y (DataFrame): Original response variable.
+    scaler (scaler): Optional. Scaler from scikitlearn.preprocessing._data library. Default is MinMaxScaler.
 
     Returns
     ------
-    X (pd.DataFrame): One-hot encoded dataframe.
+    X (DataFrame): One-hot encoded dataframe, with rescaled nu
+    y (DataFrame): Original response variable with 
+    scaler (scaler): Optional. Scaler from scikitlearn.preprocessing._data library. Default is MinMaxScaler.
     """
+    print(f"Original Size X: {X.shape} y: {y.shape}")
+
     categorical_columns = list(X.dtypes[X.dtypes == "category"].index.values)
+    numerical_columns = [c for c in X.columns if c not in categorical_columns]
+
+    if not scaler:
+        scaler = MinMaxScaler()
+    X[numerical_columns] = scaler.fit_transform(X[numerical_columns])
+
     for column in categorical_columns:
-        X_one_hot = pd.get_dummies(X[column], prefix=column)
+        X_one_hot = pd.get_dummies(X[column], prefix=column, dtype="int")
         X = X.merge(X_one_hot, left_index=True, right_index=True)
     X.drop(columns=categorical_columns, inplace=True)
-    return X
+
+    # Drop Missing Values.
+    X = X.dropna()
+    # Make sure you reduce y as well, since the above is a row-reduction technique.
+    y = y[X.index]
+    print(f"New Size X: {X.shape} y: {y.shape}")
+    return X, y, scaler
 
 def save_weights(weights, filename) -> None:
     """
