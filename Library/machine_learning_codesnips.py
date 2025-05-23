@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score
@@ -8,11 +9,13 @@ from sklearn.linear_model import Ridge
 from sklearn.linear_model import RidgeCV
 from sklearn.linear_model import Lasso
 from sklearn.linear_model import LassoCV
-from statsmodels.genmod.generalized_linear_model import GLM
-from statsmodels.api as sm
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
+
 from scipy import stats
+from statsmodels.genmod.generalized_linear_model import GLM
+from statsmodels.api as sm
+
 from Library import data # This is a custom library.
 
 ######### 
@@ -40,6 +43,9 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size= 0.33, rando
 #########
 # Data: Remove missing, nonnumerical, and scale data.
 #########
+# NOTE: This could be in the ML library more explicitly, but it is being handled in the
+# data custom library.
+
 # Remove missing and categorical/nonnumerical values
 X_train, y_train = data.remove_missing_and_nonNumerical_values(X_train, y_train)
 X_test, y_test = data.remove_missing_and_nonNumerical_values(X_test, y_test)
@@ -258,3 +264,14 @@ print(f"Best Lambda: {lasso_cv.alpha_: 3.3f} R2_score: {lasso_r2: 3.3f}")
 
 # Alpha Selection for Lasso Regression Cross Validation
 # See plotting codesnips for more using Alpha Selection.
+
+
+######################
+# One-Hot Encoding
+######################
+
+categorical_columns = list(df.dtypes[df.dtypes == "category"].index.values)
+for column in categorical_columns:
+    df_one_hot = pd.get_dummies(df[column], prefix=column, dtype="int")
+    df = df.merge(df_one_hot, left_index=True, right_index=True)
+df.drop(columns=categorical_columns, inplace=True)
