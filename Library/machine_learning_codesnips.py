@@ -15,6 +15,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
 from sklearn.metrics import classification_report
 from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.metrics import RocCurveDisplay
 
 from scipy import stats
 from statsmodels.genmod.generalized_linear_model import GLM
@@ -300,4 +301,7 @@ from sklearn.metrics import classification_report
 ConfusionMatrixDisplay.from_estimator(lda_model, X_test, y_test, display_labels=["M", "B"])
 
 # Confusion Matrix (Display)
+## See: plotting codesnips.
+
+# ROC Curve (Display)
 ## See: plotting codesnips.

@@ -6,6 +6,8 @@ from yellowbrick.regressor import residuals_plot
 from yellowbrick.regressor import prediction_error
 from yellowbrick.regressor import AlphaSelection
 from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.metrics import RocCurveDisplay
+
 
 # Figures and Subplots
 fig = plt.figure(figsize=(8, 8/1.618))
@@ -119,3 +121,8 @@ visualization.fit(X_train, y_train)
 # Confusion Matrix Display
 from sklearn.metrics import ConfusionMatrixDisplay
 ConfusionMatrixDisplay.from_estimator(lda_model, X_test, y_test, display_labels=["M", "B"])
+
+# ROC Curve
+from sklearn.metrics import RocCurveDisplay
+fig = plt.figure(figsize=(8, 8 / 1.618));
+RocCurveDisplay.from_estimator(lda_model, X_test, y_test, ax=plt.subplot())
