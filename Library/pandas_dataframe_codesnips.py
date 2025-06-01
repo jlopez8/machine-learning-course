@@ -50,3 +50,11 @@ df.rename(colums=new_cols, inplace=True)
 
 # ReMap Cat Vars
 df[<CATVAR>] = df[<CAT_VAR>].map({"catvar1": "CV1", "catvar2": "CV2"...})
+
+# One-Hot Encoding / Get Dummies for Cat Vars
+pd.get_dummies(df[<CAT_VAR>], prefix=<CAT_VAR>)
+
+# Merging
+# Left Merge, left index means we use df1s index and right index means we use df2s index.
+# These are keywords specifying on what exactly we will be joining. In this case, on the index.
+df1.merge(df2, left_index=True, right_index=True)
