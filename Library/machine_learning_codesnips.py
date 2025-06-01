@@ -4,13 +4,17 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.linear_model import LinearRegression 
 from sklearn.linear_model import Ridge
 from sklearn.linear_model import RidgeCV
 from sklearn.linear_model import Lasso
 from sklearn.linear_model import LassoCV
+
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
+from sklearn.metrics import classification_report
+from sklearn.metrics import ConfusionMatrixDisplay
 
 from scipy import stats
 from statsmodels.genmod.generalized_linear_model import GLM
@@ -265,7 +269,6 @@ print(f"Best Lambda: {lasso_cv.alpha_: 3.3f} R2_score: {lasso_r2: 3.3f}")
 # Alpha Selection for Lasso Regression Cross Validation
 # See plotting codesnips for more using Alpha Selection.
 
-
 ######################
 # One-Hot Encoding
 ######################
@@ -275,3 +278,26 @@ for column in categorical_columns:
     df_one_hot = pd.get_dummies(df[column], prefix=column, dtype="int")
     df = df.merge(df_one_hot, left_index=True, right_index=True)
 df.drop(columns=categorical_columns, inplace=True)
+
+######################
+# Linear Discriminant Analysis LDS
+######################
+lda = LinearDiscriminantAnalysis()
+
+# Now fit the model.
+lda_model= lda.fit(X_train, y_train)
+
+# Analyze the weights.
+lda_weights_ = lda_model.coef_
+lda_weights = pd.DataFrame(lda_weights_, columns=X.columns)
+
+######################
+# Metrics
+######################
+
+# Classification Report
+from sklearn.metrics import classification_report
+ConfusionMatrixDisplay.from_estimator(lda_model, X_test, y_test, display_labels=["M", "B"])
+
+# Confusion Matrix (Display)
+## See: plotting codesnips.
