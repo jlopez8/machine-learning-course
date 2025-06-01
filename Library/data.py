@@ -94,10 +94,12 @@ def one_hot_encoding_preprocessing(X: DataFrame, y:DataFrame, scaler=None) -> Da
     categorical_columns = list(X.dtypes[X.dtypes == "category"].index.values)
     numerical_columns = [c for c in X.columns if c not in categorical_columns]
 
+    # Scale numerical values.
     if not scaler:
         scaler = MinMaxScaler()
     X[numerical_columns] = scaler.fit_transform(X[numerical_columns])
 
+    # Apply one-hot.
     for column in categorical_columns:
         X_one_hot = pd.get_dummies(X[column], prefix=column, dtype="int")
         X = X.merge(X_one_hot, left_index=True, right_index=True)
