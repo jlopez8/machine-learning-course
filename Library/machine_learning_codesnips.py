@@ -280,9 +280,12 @@ for column in categorical_columns:
     df = df.merge(df_one_hot, left_index=True, right_index=True)
 df.drop(columns=categorical_columns, inplace=True)
 
+
 ######################
+# Classifiers
+######################
+
 # Linear Discriminant Analysis LDS
-######################
 lda = LinearDiscriminantAnalysis()
 
 # Now fit the model.
@@ -291,6 +294,16 @@ lda_model= lda.fit(X_train, y_train)
 # Analyze the weights.
 lda_weights_ = lda_model.coef_
 lda_weights = pd.DataFrame(lda_weights_, columns=X.columns)
+
+# NAIVE Bayes Classifier
+from sklearn.naive_bayes import GaussianNB
+naive_bayes = GaussianNB()
+naive_bayes_cv_score = cross_val_score(naive_bayes, X_train, y_train, cv=10)
+naive_bayes_mean_cv = np.mean(naive_bayes_cv_score)
+naive_bayes_model = GaussianNB().fit(X_train, y_train)
+naive_bayes_theta = naive_bayes_model.theta_
+means = pd.DataFrame(naive_bayes_theta, columns=<ORIGINAL_DATA_COLUMNS>)
+
 
 ######################
 # Metrics
@@ -305,3 +318,4 @@ ConfusionMatrixDisplay.from_estimator(lda_model, X_test, y_test, display_labels=
 
 # ROC Curve (Display)
 ## See: plotting codesnips.
+
