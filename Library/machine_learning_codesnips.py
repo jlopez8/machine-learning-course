@@ -4,7 +4,9 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import GridSearchCV
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.linear_model import LinearRegression 
 from sklearn.linear_model import Ridge
 from sklearn.linear_model import RidgeCV
@@ -303,6 +305,22 @@ naive_bayes_mean_cv = np.mean(naive_bayes_cv_score)
 naive_bayes_model = GaussianNB().fit(X_train, y_train)
 naive_bayes_theta = naive_bayes_model.theta_
 means = pd.DataFrame(naive_bayes_theta, columns=<ORIGINAL_DATA_COLUMNS>)
+
+#Quadratic Classifier
+from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+from sklearn.model_selection import GridSearchCV
+
+# Model.
+qda_model = QuadraticDiscriminantAnalysis()
+# Cross Validation
+qda_model_cv_score = cross_val_score(qda_model, X_train, y_train, cv=10)
+qda_model_mean_cv = np.mean(qda_model_cv_score)
+# Optimize for regularization.
+param = {"reg_param": np.linspace(0, 1, 21, endpoint=True)}
+# Apply Grid search, n_jobs is number of processors, -1 being all of them. 
+# This produces a model.
+qda_grid_search = GridSearchCV(qda_model, param, cv=10, n_jobs=-1, refit=True)
+qda_grid_search.fit(X_train, y_train)
 
 
 ######################
