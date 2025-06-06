@@ -12,6 +12,7 @@ from sklearn.linear_model import Ridge
 from sklearn.linear_model import RidgeCV
 from sklearn.linear_model import Lasso
 from sklearn.linear_model import LassoCV
+from sklearn.linear_model import LogisticRegression
 
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
@@ -322,6 +323,31 @@ param = {"reg_param": np.linspace(0, 1, 21, endpoint=True)}
 qda_grid_search = GridSearchCV(qda_model, param, cv=10, n_jobs=-1, refit=True)
 qda_grid_search.fit(X_train, y_train)
 
+#Logistic Classifier
+# For more information see lesson 15. 
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import GridSearchCV
+
+# Model. Default paramters is L2 penatly with weight of 1.
+logistic_regression = LogisticRegression(max_iter=1000)
+# Cross validation
+logistic_regression_cv_score = cross_val_score(logistic_regression, X_train, y_train, cv=10)
+logistic_regression_mean_cv = np.mean(logistic_regression_cv_score)
+# Optimize for Regularization with Grid Scan.
+# There are two types of penalties, Lasso and Ridge, so we can specify both or either in this case.
+# C is the inverse of regularization strength, and must be a positive float.
+# This will prime the logistic_regression with paramaters to try when fitting.
+# NOTE: default solver "lbfgs" no support L1. We can specify support using "liblinear" to support both L1 and L2 
+# in the params with "solver" as shown here.
+search_space = 10 ** np.linspace(-3, 3, 21, endpoint=True)
+param = {"penalty": ["L1", "L2"], "C": search_space, "solver": ["liblinear"]}
+logistic_regression_grid_search = GridSearchCV(logistic_regression, param, cv=10, n_jobs=-1, refit=True)
+
+# Fit.
+logistic_regression_grid_search.fit(X_train, y_train)
+
+# Accessing weights
+weights = logistic_regression_grid_search.best_estimator_.coef_
 
 ######################
 # Metrics

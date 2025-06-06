@@ -99,7 +99,10 @@ plt.subplots(figsize=(10,8))
 sns.heatmap(corr, mask=mask, cmap='seismic', center=0, square='True')
 # Visualize weights w heatmap to check strength of weights.
 fig = plt.figure(figsize=(20, 2));
+weights = logistic_regression_grid_search.best_estimator_.coef_
+df_weights = pd.DataFrame(weights, columns=X.columns)
 sns.heatmap(lda_weights.abs(), annot=True, cmap="Blues", annot_kws={"size": 12})
+sns.heatmap(df_weights.abs(), annot=True, cmap="Blues", linewidths=0.5, cbar=True, xticklabels=True, annot_kws={"size": 12})
 
 ## Pairplotting
 sns.pairplot(df, hue="class") # for pairwise comparisons
