@@ -5,6 +5,9 @@ import statsmodels.api as sm
 from yellowbrick.regressor import residuals_plot
 from yellowbrick.regressor import prediction_error
 from yellowbrick.regressor import AlphaSelection
+from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.metrics import RocCurveDisplay
+
 
 # Figures and Subplots
 fig = plt.figure(figsize=(8, 8/1.618))
@@ -94,6 +97,12 @@ sns.violinplot(data=df, x='x1', y='y1', hue='reponse var/x2', split=True)
 mask = np.triu(np.ones_like(corr, d_type=bool) # mask is for missing values
 plt.subplots(figsize=(10,8))
 sns.heatmap(corr, mask=mask, cmap='seismic', center=0, square='True')
+# Visualize weights w heatmap to check strength of weights.
+fig = plt.figure(figsize=(20, 2));
+weights = logistic_regression_grid_search.best_estimator_.coef_
+df_weights = pd.DataFrame(weights, columns=X.columns)
+sns.heatmap(lda_weights.abs(), annot=True, cmap="Blues", annot_kws={"size": 12})
+sns.heatmap(df_weights.abs(), annot=True, cmap="Blues", linewidths=0.5, cbar=True, xticklabels=True, annot_kws={"size": 12})
 
 ## Pairplotting
 sns.pairplot(df, hue="class") # for pairwise comparisons
@@ -111,3 +120,12 @@ visualizer = prediction_error(linear_regression, X_test, y_test, is_fitted=True)
 visualization = AlphaSelection(RidgeCV(alphas=lambdas))
 visualization = AlphaSelection(LassoCV(alphas=lambdas))
 visualization.fit(X_train, y_train)
+
+# Confusion Matrix Display
+from sklearn.metrics import ConfusionMatrixDisplay
+ConfusionMatrixDisplay.from_estimator(lda_model, X_test, y_test, display_labels=["M", "B"])
+
+# ROC Curve
+from sklearn.metrics import RocCurveDisplay
+fig = plt.figure(figsize=(8, 8 / 1.618));
+RocCurveDisplay.from_estimator(lda_model, X_test, y_test, ax=plt.subplot())
