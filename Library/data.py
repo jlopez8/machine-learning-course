@@ -1,5 +1,5 @@
 # data.py
-# Class for handling data in preprocessing, storing, and retrieving. 
+# pre-Class for handling data in preprocessing, storing, and retrieving. 
 
 import pandas as pd
 from pandas import DataFrame

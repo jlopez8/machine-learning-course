@@ -8,6 +8,8 @@ from yellowbrick.regressor import AlphaSelection
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import RocCurveDisplay
 
+from iPython.display import display, HTML
+
 
 # Figures and Subplots
 fig = plt.figure(figsize=(8, 8/1.618))
@@ -129,3 +131,16 @@ ConfusionMatrixDisplay.from_estimator(lda_model, X_test, y_test, display_labels=
 from sklearn.metrics import RocCurveDisplay
 fig = plt.figure(figsize=(8, 8 / 1.618));
 RocCurveDisplay.from_estimator(lda_model, X_test, y_test, ax=plt.subplot())
+
+# Training Display Results (HTML)
+from IPython.display import display, HTML
+show_html = lambda html: display(HTML(html))
+df_html = pd.DataFrame(linear_support_vector_search.cv_results_)
+df_html.head()  
+show_html(df_html.loc[:, ["params", "mean_test_score", "rank_test_score"]].sort_values(by="rank_test_score").head().to_html())
+
+# Time Series Visualization
+plt.figure(figsize=(8, 8 / 1.618));
+# Just plot the first 500. There are >7k value.
+plt.plot(y_test_w[:500], "r")
+plt.plot(linear_support_vector_fit.predict(X_test_w[:500, :]), "b")
