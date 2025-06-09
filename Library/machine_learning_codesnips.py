@@ -347,7 +347,107 @@ logistic_regression_grid_search = GridSearchCV(logistic_regression, param, cv=10
 logistic_regression_grid_search.fit(X_train, y_train)
 
 # Accessing weights
-weights = logistic_regression_grid_search.best_estimator_.coef_
+weights = logistic_regression_grid_search.best_estimator_.coef_ 
+
+######################
+# Time Series
+######################
+
+# Time Series Windows
+from numpy.lib.stride_tricks import sliding_window_view
+from sklearn.preprocessing import MinMaxScaler
+
+w = 4
+
+# Windows
+## Remember this should lead to a matrix of windows.
+## Each of this data should therefore expand both the X-features so they are in the 
+## manner of sliding window and the corresponding y-targets.
+## This part here will instantiate the windows_train instance of `sliding_window_view`.
+## This this givs us the corresponding w time-features used to predict the w+1 position for EACH of the
+## Sliding window partitions. 
+windows_train = sliding_window_view(y_train_scaled, w + 1, axis=0).copy()
+X_train_w = windows_train.squeeze()[:,:-1] # Take all up to the last one.
+y_train_w = windows_train.squeeze()[:,-1] # Take the last one.
+windows_test = sliding_window_view(y_test_scaled, w + 1, axis=0).copy()
+X_test_w = windows_test.squeeze()[:, :-1] 
+y_test_w = windows_test.squeeze()[:, -1]
+
+######################
+# SVM Kernels
+######################
+
+## Linear Kernel
+from sklearn.svm import SVR
+from skopt import BayesSearchCV
+from sklearn.model_selection import TimeSeriesSplit
+from sklearn.metrics import make_scorer, mean_squared_error, mean_absolute_error
+# Set your hyperparameters for the SVM linear kernel. 
+param = {"C": 10 ** np.linspace(-3, 3, 101), "epsilon": np.linspace(0, 0.1, 11)}
+# SVR cache_size is MB of size of the kernel cache.
+linear_support_vector_regression = SVR(kernel="linear", max_iter=25000, cache_size=2000)
+# Optimize our Hyperparameters using an optimization method.
+# In BayesSearchCV we have a cross-validation splitting strategy that uses a time series split.
+# This is different that a static, non-temporal split. We need to carefully define this strategy
+# so it lines up with our current strategy. The sliding window we have is size w + 1, so this should be the gap. 
+# Scoring is also a function provided to this method. We need to wrap our mean squared error in a make_scorer
+# wrapper to give to the scoring method of Bayes Search. Since this method is such that lower is better, we can 
+# provide argument greater is better to be False.
+# Refit: after performing the hyperparameter search, the model will have the best parameters 
+linear_support_vector_search = BayesSearchCV(
+    linear_support_vector_regression, param, n_iter=15, 
+    cv=TimeSeriesSplit(n_splits=5, gap=w+1), 
+    scoring=make_scorer(mean_squared_error, greater_is_better=False),
+    n_jobs=-1,
+    refit=True,
+    random_state=0
+)
+# Finally, fit the train data. 
+linear_support_vector_fit = linear_support_vector_search.fit(X_train_w, y_train_w)
+
+## Polynomial Kernel
+params = {
+    "C": 10 ** np.linspace(-3, 3, 101), 
+    "epsilon": np.linspace(0, 0.1,  11),
+    "degree": [2, 3, 4],
+}
+polynomial_support_vector_regression = SVR(
+    kernel="poly", max_iter=25000, cache_size=2000
+)
+polynomial_svm_search = BayesSearchCV(
+    polynomial_support_vector_regression,
+    params, cv=TimeSeriesSplit(n_splits=5, gap=w+1),
+    scoring=make_scorer(mean_squared_error, greater_is_better=False),
+    n_jobs=-1, refit=True, random_state=0
+)
+polynomial_svm_fit = polynomial_svm_search.fit(X_train_w, y_train_w)
+
+## Radial Basis Function Kernel
+params = {
+    "C": 10 ** np.linspace(-3, 3, 101),
+    "epsilon": np.linspace(0, 0.1, 11), 
+    "gamma": ["scale", "auto"]
+}
+radial_basis_function_regression = SVR(
+    kernel="rbf", max_iter=25000, cache_size=2000
+)
+radial_basis_function_search = BayesSearchCV(
+    radial_basis_function_regression, 
+    search_spaces=params,
+    n_iter=15, 
+    cv=TimeSeriesSplit(n_splits=5, gap=w+1),
+    scoring=make_scorer(mean_squared_error, greater_is_better=False),
+    n_jobs=-1, refit=True, random_state=0
+)
+radial_basis_function_fit = radial_basis_function_search.fit(X_train_w, y_train_w)
+
+# Performance Metrics
+linear_support_vector_mse = mean_squared_error(y_test_w, linear_support_vector_fit.predict(X_test_w))
+linear_support_vector_mae = mean_absolute_error(y_test_w, linear_support_vector_fit.predict(X_test_w))
+print(f"linear_support_vector_mse: {linear_support_vector_mse}.")
+print(f"linear_support_vector_mae: {linear_support_vector_mae}.")
+# Visualize:
+## See plotting codesnip.
 
 ######################
 # Metrics

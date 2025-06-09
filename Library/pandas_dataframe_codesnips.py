@@ -58,3 +58,4 @@ pd.get_dummies(df[<CAT_VAR>], prefix=<CAT_VAR>)
 # Left Merge, left index means we use df1s index and right index means we use df2s index.
 # These are keywords specifying on what exactly we will be joining. In this case, on the index.
 df1.merge(df2, left_index=True, right_index=True)
+
