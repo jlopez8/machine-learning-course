@@ -48,6 +48,15 @@ y = df.loc[:, df.columns == <RESPONSE_COL>]
 # Random state is for seeding a partition. 0 - 42 are common seeds.
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size= 0.33, random_state=42)
 
+# Train Test split with stratification.
+# Suppose you have data that fits into 4 categories.
+# With stratification, you can take this into account so the data splitting works evenly across
+# those 4 categories, otherwise, it will split in a random manner and you may have 
+# much of the training data significantly concentrated on samples that are not represented in the
+# testing data etc. So your models are not going to perform well on the test since they were trained
+# in the other data.
+text_train, text_test, labels_train, labels_test = train_test_split(text, labels, test_size=0.30, random_state=42, stratify=labels)
+
 #########
 # Data: Remove missing, nonnumerical, and scale data.
 #########
