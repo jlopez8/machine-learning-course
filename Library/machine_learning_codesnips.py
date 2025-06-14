@@ -439,6 +439,8 @@ polynomial_svm_search = BayesSearchCV(
 polynomial_svm_fit = polynomial_svm_search.fit(X_train_w, y_train_w)
 
 ## Radial Basis Function Kernel
+## Scale means we use the variance of the data in the calculation, while auto means we only
+## Use the number of features. See the notes for a deeper definition.
 params = {
     "C": 10 ** np.linspace(-3, 3, 101),
     "epsilon": np.linspace(0, 0.1, 11), 
@@ -466,7 +468,8 @@ radial_basis_function_fit = radial_basis_function_search.fit(X_train_w, y_train_
 # SVM For Classification
 ######################
 
-# Label Transformation / Label Encoding
+# Data Transformations
+## Label Transformation / Label Encoding
 from sklearn.preprocessing import LabelEncoder
 # First to a fit transform on the training data.
 # Then do a transform - only on the test data. That way you use the same encoding
@@ -475,10 +478,10 @@ label_encoder = LabelEncoder()
 labels_train_encoded = label_encoder.fit_transform(labels_train)
 labels_test_encoded = label_encoder.transform(labels_test)
 
-# Inverse Transform: Transforms labels back to original encoding
+## Inverse Transform: Transforms labels back to original encoding
 categorical_labels = label_encoder.inverse_transform(np.unique(labels_train_encoded))
 
-# Text Transformation / Text Vectorize
+## Text Transformation / Text Vectorize
 from sklearn.feature_extraction.text import CountVectorizer
 # `max_features` is "max number of different words". Controled by vocabulary size.
 vocabulary_size = 1000
@@ -489,14 +492,15 @@ text_test_vectorized = cvec.transform(text_test)
 ## Dimensionality reduction: see dim reduction codesnips
 ## Visualize: see word cloud in plotting codesnips
 
-######################
 # SVM Classification Linear Kernel
 from sklearn.svm import SVC
 from skopt import BayesSearchCV
 import pickle
 
 param = {"C": 10 ** np.linspace(-3, 3, 101)}
-linear_support_vector_classifier = SVC(kernel="linear", max_iter=25000, random_state=0)
+linear_support_vector_classifier = SVC(
+    kernel="linear", max_iter=25000, random_state=0
+)
 linear_support_vector_classifier_search = BayesSearchCV(
     linear_support_vector_classifier,
     param, n_iter=15, cv=5, n_jobs=-1, refit=True, random_state=0
@@ -506,7 +510,6 @@ with open("linear_support_vector_classifier_search.pkl", "wb") as file:
     pickle.dump(linear_support_vector_classifier_search, file)
 # Visualize: see plotting notebook
 
-######################
 # SVM Classification Polynomial Kernel
 from sklearn.svm import SVC
 from skopt import BayesSearchCV
@@ -528,13 +531,35 @@ with open("polynomial_support_vector_classifier_search.pkl", "wb") as file:
     print(f"File saved as: polynomial_support_vector_classifier_search.pkl")
 # Visualize see plotting codesnips
 
+# SVM Classification Radial Basis Function Kernel
+from sklearn.svm import SVC
+from skopt import BayesSearchCV
+import pickle
+## Scale means we use the variance of the data in the calculation, while auto means we only
+## Use the number of features. See the notes for a deeper definition.
+params = {
+    "C": 10 ** np.linspace(-3, 3, 101), 
+    "gamma": ["scale", "auto"]
+}
+radial_basis_support_vector_classifier = SVC(
+    kernel="rbf", max_iter=25000, random_state=0
+)
+radial_basis_support_vector_classifier_search = BayesSearchCV(
+    radial_basis_support_vector_classifier, params, n_iter=15, cv=5, n_jobs=-1, refit=True, random_state=0 
+)
+with open("radial_basis_support_vector_classifier_search.pkl", "wb") as file:
+    pickle.dump(radial_basis_support_vector_classifier_search, file)
+    print("File saved as: radial_basis_support_vector_classifier_search.pkl")
+# Visualize: see plotting codesnips.
+
+
 ######################
 # Metrics
 ######################
 
 # Classification Report
 from sklearn.metrics import classification_report
-ConfusionMatrixDisplay.from_estimator(lda_model, X_test, y_test, display_labels=["M", "B"])
+classification_report_ = classification_report(labels_test_encoded, labels_predicted, target_names=categorical_labels)
 
 # Confusion Matrix (Display)
 ## See: plotting codesnips.
