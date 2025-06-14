@@ -5,9 +5,10 @@ import statsmodels.api as sm
 from yellowbrick.regressor import residuals_plot
 from yellowbrick.regressor import prediction_error
 from yellowbrick.regressor import AlphaSelection
+from yellowbrick.classifier.rocauc import roc_auc
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import RocCurveDisplay
-
+from wordcloud import WordCloud
 from iPython.display import display, HTML
 
 
@@ -22,6 +23,12 @@ plt.scatter(
     df[<COL1>], df[<COL2>],
     s=100, c=df[<CLASS>].apply(lambda x: color_map[x])
 )
+
+## SVM classification 
+df_text = pd.DataFrame(text_data[:, :2])
+df_labels = pd.DataFrame({"labels": labels_train})
+df_train = pd.concat([df_text, df_labels], axis=1)
+sns.scatterplot(x=0, y=1, hue="labels", data=df_train, palette="tab10")
 
 # 3D plotting
 fig = plt.figure(figsize=(8, 8/1.618));
@@ -126,13 +133,29 @@ visualization.fit(X_train, y_train)
 # Confusion Matrix Display
 from sklearn.metrics import ConfusionMatrixDisplay
 ConfusionMatrixDisplay.from_estimator(lda_model, X_test, y_test, display_labels=["M", "B"])
+ConfusionMatrixDisplay.from_estimator(
+    linear_support_vector_classifier_search, 
+    text_test_vectorized, labels_test_encoded, display_labels=categorical_labels,
+    ax=plt.subplot()
+)
 
 # ROC Curve
 from sklearn.metrics import RocCurveDisplay
 fig = plt.figure(figsize=(8, 8 / 1.618));
 RocCurveDisplay.from_estimator(lda_model, X_test, y_test, ax=plt.subplot())
 
+## SVM classification
+from yellowbrick.classifier.rocauc import roc_auc
+plt.figure(figsize=(8, 8));
+roc_auc(
+    linear_support_vector_classifier_search, 
+    text_train_vectorized, labels_train_encoded,
+    text_test_vectorized, labels_test_encoded,
+    classes=categorical_labels
+)
+
 # Training Display Results (HTML)
+## Support Vector Machines Visualize - SVM Visualize
 from IPython.display import display, HTML
 show_html = lambda html: display(HTML(html))
 df_html = pd.DataFrame(linear_support_vector_search.cv_results_)
@@ -144,3 +167,11 @@ plt.figure(figsize=(8, 8 / 1.618));
 # Just plot the first 500. There are >7k value.
 plt.plot(y_test_w[:500], "r")
 plt.plot(linear_support_vector_fit.predict(X_test_w[:500, :]), "b")
+
+# Word Cloud
+from wordcloud import WordCloud
+wordcloud = WordCloud(background_color="black")
+wordcloud.generate_from_frequencies(cvec.vocabulary_)
+plt.figure(figsize=(12, 12 / 1.618))
+plt.imshow(wordcloud, interpolation="bilinear")
+plt.axis("off");
