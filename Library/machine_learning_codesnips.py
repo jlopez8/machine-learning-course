@@ -1,10 +1,14 @@
 import pandas as pd
 import numpy as np
+import pickle
 
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import GridSearchCV
+
+from sklearn.preprocessing import LabelEncoder
+from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.linear_model import LinearRegression 
@@ -13,6 +17,9 @@ from sklearn.linear_model import RidgeCV
 from sklearn.linear_model import Lasso
 from sklearn.linear_model import LassoCV
 from sklearn.linear_model import LogisticRegression
+
+from sklearn.svm import SVC
+from skopt import BayesSearchCV
 
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
@@ -383,7 +390,7 @@ X_test_w = windows_test.squeeze()[:, :-1]
 y_test_w = windows_test.squeeze()[:, -1]
 
 ######################
-# SVM Kernels
+# SVM For Regression
 ######################
 
 ## Linear Kernel
@@ -450,13 +457,76 @@ radial_basis_function_search = BayesSearchCV(
 )
 radial_basis_function_fit = radial_basis_function_search.fit(X_train_w, y_train_w)
 
-# Performance Metrics
-linear_support_vector_mse = mean_squared_error(y_test_w, linear_support_vector_fit.predict(X_test_w))
-linear_support_vector_mae = mean_absolute_error(y_test_w, linear_support_vector_fit.predict(X_test_w))
-print(f"linear_support_vector_mse: {linear_support_vector_mse}.")
-print(f"linear_support_vector_mae: {linear_support_vector_mae}.")
+# Performance: see Performance Metrics for SVM below.
+
 # Visualize:
 ## See plotting codesnip.
+
+######################
+# SVM For Classification
+######################
+
+# Label Transformation / Label Encoding
+from sklearn.preprocessing import LabelEncoder
+# First to a fit transform on the training data.
+# Then do a transform - only on the test data. That way you use the same encoding
+# scheme on the test data as was used on the training data. 
+label_encoder = LabelEncoder()
+labels_train_encoded = label_encoder.fit_transform(labels_train)
+labels_test_encoded = label_encoder.transform(labels_test)
+
+# Inverse Transform: Transforms labels back to original encoding
+categorical_labels = label_encoder.inverse_transform(np.unique(labels_train_encoded))
+
+# Text Transformation / Text Vectorize
+from sklearn.feature_extraction.text import CountVectorizer
+# `max_features` is "max number of different words". Controled by vocabulary size.
+vocabulary_size = 1000
+cvec = CountVectorizer(max_features=vocabulary_size, stop_words="english", binary=True)
+text_train_vectorized = cvec.fit_transform(text_train)
+text_test_vectorized = cvec.transform(text_test)
+
+## Dimensionality reduction: see dim reduction codesnips
+## Visualize: see word cloud in plotting codesnips
+
+######################
+# SVM Classification Linear Kernel
+from sklearn.svm import SVC
+from skopt import BayesSearchCV
+import pickle
+
+param = {"C": 10 ** np.linspace(-3, 3, 101)}
+linear_support_vector_classifier = SVC(kernel="linear", max_iter=25000, random_state=0)
+linear_support_vector_classifier_search = BayesSearchCV(
+    linear_support_vector_classifier,
+    param, n_iter=15, cv=5, n_jobs=-1, refit=True, random_state=0
+)
+linear_support_vector_classifier_search.fit(text_train_vectorized, labels_train_encoded)
+with open("linear_support_vector_classifier_search.pkl", "wb") as file:
+    pickle.dump(linear_support_vector_classifier_search, file)
+# Visualize: see plotting notebook
+
+######################
+# SVM Classification Polynomial Kernel
+from sklearn.svm import SVC
+from skopt import BayesSearchCV
+import pickle
+params = {
+    "C": 10 ** np.linspace(-3, 3, 101), 
+    "degree": [2, 3]
+}
+polynomial_support_vector_classifier = SVC(
+    kernel="poly", max_iter=25000, random_state=0
+)
+polynomial_support_vector_classifier_search = BayesSearchCV(
+    polynomial_support_vector_classifier, params, 
+    n_iter=15, cv=5, n_jobs=-1, refit=True, random_state=0
+)
+polynomial_support_vector_classifier_search.fit(text_train_vectorized, labels_train_encoded)
+with open("polynomial_support_vector_classifier_search.pkl", "wb") as file:
+    pickle.dump(polynomial_support_vector_classifier_search, file)
+    print(f"File saved as: polynomial_support_vector_classifier_search.pkl")
+# Visualize see plotting codesnips
 
 ######################
 # Metrics
@@ -471,4 +541,10 @@ ConfusionMatrixDisplay.from_estimator(lda_model, X_test, y_test, display_labels=
 
 # ROC Curve (Display)
 ## See: plotting codesnips.
+
+# Performance Metrics for SVM
+linear_support_vector_mse = mean_squared_error(y_test_w, linear_support_vector_fit.predict(X_test_w))
+linear_support_vector_mae = mean_absolute_error(y_test_w, linear_support_vector_fit.predict(X_test_w))
+print(f"linear_support_vector_mse: {linear_support_vector_mse}.")
+print(f"linear_support_vector_mae: {linear_support_vector_mae}.")
 

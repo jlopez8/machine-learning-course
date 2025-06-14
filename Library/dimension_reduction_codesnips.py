@@ -53,3 +53,18 @@ df_scaled[["ISOMAP1", "ISOMAP2", "ISOMAP3"]] = isomap().fit_transform(df_scaled[
 # Note: this requires a standardized dataset.
 fisher = LinearDiscriminantAnalysis(n_components=2)
 df_std[["FISH1", "FISH2"]] = fisher.fit_transform(df_std[data_columns].values, y=df_std[<TARGET_REGRESSION_COL>])
+
+
+# Dim Redux for Support Vector Machines
+from sklearn.decomposition import PCA
+
+# Will use PCA to dim redux the text data, then we will hotglue it with the labels to make a dataframe.
+# Make sure you make the vectorized matrix dense for the fit_transform.
+# Note the use of np.asarray, which this requires because fit transform does no like np.matrix.
+pca = PCA()
+text_data_as_dense_array = np.asarray(text_train_vectorized.todense())
+text_data = pca.fit_transform(text_data_as_dense_array)
+df_text = pd.DataFrame(text_data[:, :2])
+df_labels = pd.DataFrame({"labels": labels_train})
+df_train = pd.concat([df_text, df_labels], axis=1)
+# Visualization see plotting codesnips. 
