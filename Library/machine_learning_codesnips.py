@@ -552,6 +552,37 @@ with open("radial_basis_support_vector_classifier_search.pkl", "wb") as file:
     print("File saved as: radial_basis_support_vector_classifier_search.pkl")
 # Visualize: see plotting codesnips.
 
+######################
+# Neural Networks
+######################
+from sklearn.neural_network import MLPRegressor
+from skopt import BayesSearchCV
+from sklearn.model_selection import TimeSeriesSplit
+from sklearn.metrics import make_scorer
+from sklearn.metrics import mean_squared_error
+
+# Output Data
+params = {
+    "hidden_layer_sizes": [100, 200, 300], 
+    "activation": ["relu", "logistic"], 
+    "alpha": [0.0001, 0.001, 0.01], # L2
+    "momentum": [0.95, 0.90, 0.85], # local minima momentum 
+    "learning_rate_init": [0.001, 0.01, 0.1], #step-size control for weight updates.
+    "n_iter_no_change": [30, 40, 50],  # No. Iterations allowed during training while score is not improving. 
+    "learning_rate": ["constant", "invscaling", "adaptive"], # scheme for changing the learning rate started by `learning_rate_init`
+}
+
+mlp = MLPRegressor(max_iter=100000, early_stopping=True, random_state=0)
+mlp_bs = BayesSearchCV(
+    mlp, params,
+    cv = TimeSeriesSplit(n_splits=5, gap=w + 1), 
+    scoring=make_scorer(mean_squared_error, greater_is_better=False),
+    n_iter=15, n_jobs=-1, refit=True, random_state=0, 
+)
+mlp_bs.fit(X_train_w, y_train_w)
+with open("multilayer_perceptron_nerual_network_fit.pkl", "wb") as file:
+    pickle.dump(mlp_bs, file)
+# Visualize: see plotting codesnips.
 
 ######################
 # Metrics
@@ -568,8 +599,11 @@ classification_report_ = classification_report(labels_test_encoded, labels_predi
 ## See: plotting codesnips.
 
 # Performance Metrics for SVM
-linear_support_vector_mse = mean_squared_error(y_test_w, linear_support_vector_fit.predict(X_test_w))
-linear_support_vector_mae = mean_absolute_error(y_test_w, linear_support_vector_fit.predict(X_test_w))
-print(f"linear_support_vector_mse: {linear_support_vector_mse}.")
-print(f"linear_support_vector_mae: {linear_support_vector_mae}.")
+y_pred = linear_support_vector_fit.predict(X_test_w)
+performance_stats = {
+    "mean_squared_error": mean_squared_error(y_test_w, y_pred),
+    "mean_absolute_error": mean_absolute_error(y_test_w, y_pred)
+}
+print(f"linear_support_vector_mse: {performance_stats["mean_squared_error"]}.")
+print(f"linear_support_vector_mae: {performance_stats["mean_absolute_error"]}.")
 

@@ -59,3 +59,5 @@ pd.get_dummies(df[<CAT_VAR>], prefix=<CAT_VAR>)
 # These are keywords specifying on what exactly we will be joining. In this case, on the index.
 df1.merge(df2, left_index=True, right_index=True)
 
+# Series to Numpy
+e_train.to_numpy()
