@@ -553,8 +553,10 @@ with open("radial_basis_support_vector_classifier_search.pkl", "wb") as file:
 # Visualize: see plotting codesnips.
 
 ######################
-# Neural Networks
+# Neural Networks for Regression
 ######################
+
+
 from sklearn.neural_network import MLPRegressor
 from skopt import BayesSearchCV
 from sklearn.model_selection import TimeSeriesSplit
@@ -583,6 +585,31 @@ mlp_bs.fit(X_train_w, y_train_w)
 with open("multilayer_perceptron_nerual_network_fit.pkl", "wb") as file:
     pickle.dump(mlp_bs, file)
 # Visualize: see plotting codesnips.
+
+######################
+# Neural Networks for Classification
+######################
+from sklearn.neural_network import MLPClassifier
+from skopt import BayesSearchCV
+import pickle
+
+params = {
+    "hidden_layer_sizes": [10, 50, 100, 200, 300],
+    "activation": ["relu", "identity", "logistic"],
+    "alpha": [0.0001, 0.001, 0.01],
+    "momentum": [0.95, 0.90, 0.85, 0.80],
+    "learning_rate_init": [0.001, 0.01, 0.1], # initial learning rate per later
+    "n_iter_no_change": [10, 20, 30, 40, 50], # no. iters with no improvement to wait before accepting convergence.
+    "learning_rate": ["constant", "adaptive", "invscaling"], # rate types on how to change from initial learning rate.
+}
+# Early stopping reduces the adjustment time and decreases the possibilitey of over adjustment (over fitting). 
+mlp = MLPClassifier(max_iter=10000, early_stopping=True, random_state=0)
+mlp_bs = BayesSearchCV(mlp, params, n_iter=15, cv=5, n_jobs=-1, refit=True, random_state=0)
+mlp_bs.fit(X_train_norm, y_train)
+
+# Save
+with open("Lesson 20 - Neural Networks for Classification/multilayer_perceptron_neural_network_bayes_search_cv.pkl", "wb") as file:
+    pickle.dump(mlp_bs, file)
 
 ######################
 # Metrics
