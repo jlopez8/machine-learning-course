@@ -64,6 +64,41 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size= 0.33, rando
 # in the other data.
 text_train, text_test, labels_train, labels_test = train_test_split(text, labels, test_size=0.30, random_state=42, stratify=labels)
 
+
+## Train, Test, Split for Time-Series / Sliding Windows
+
+# Time Series Windows
+from numpy.lib.stride_tricks import sliding_window_view
+from sklearn.preprocessing import MinMaxScaler
+
+# Select
+e_train = df["Appliances"].iloc[:12000]
+e_test = df["Appliances"].iloc[12000:]
+
+# Normalize
+scaler = MinMaxScaler()
+e_train_s = scaler.fit_transform(e_train.to_numpy().reshape(-1,1))
+e_test_s = scaler.fit_transform(e_test.to_numpy().reshape(-1,1))
+
+# Create Windows
+# Windows
+## Remember this should lead to a matrix of windows.
+## Each of this data should therefore expand both the X-features so they are in the 
+## manner of sliding window and the corresponding y-targets.
+## This part here will instantiate the windows_train instance of `sliding_window_view`.
+## This this givs us the corresponding w time-features used to predict the w+1 position for EACH of the
+## Sliding window partitions. 
+
+w = 4
+windows_train = sliding_window_view(e_train_s, w + 1, axis=0).copy()
+X_train_w =  windows_train.squeeze()[:, :-1]
+y_train_w = windows_train.squeeze()[:, -1]
+
+windows_test = sliding_window_view(e_test_s, w + 1, axis=0)
+X_test_w = windows_test.squeeze()[:, :-1]
+y_test_w = windows_test.squeeze()[:, -1]
+
+
 #########
 # Data: Remove missing, nonnumerical, and scale data.
 #########
@@ -365,29 +400,6 @@ logistic_regression_grid_search.fit(X_train, y_train)
 # Accessing weights
 weights = logistic_regression_grid_search.best_estimator_.coef_ 
 
-######################
-# Time Series
-######################
-
-# Time Series Windows
-from numpy.lib.stride_tricks import sliding_window_view
-from sklearn.preprocessing import MinMaxScaler
-
-w = 4
-
-# Windows
-## Remember this should lead to a matrix of windows.
-## Each of this data should therefore expand both the X-features so they are in the 
-## manner of sliding window and the corresponding y-targets.
-## This part here will instantiate the windows_train instance of `sliding_window_view`.
-## This this givs us the corresponding w time-features used to predict the w+1 position for EACH of the
-## Sliding window partitions. 
-windows_train = sliding_window_view(y_train_scaled, w + 1, axis=0).copy()
-X_train_w = windows_train.squeeze()[:,:-1] # Take all up to the last one.
-y_train_w = windows_train.squeeze()[:,-1] # Take the last one.
-windows_test = sliding_window_view(y_test_scaled, w + 1, axis=0).copy()
-X_test_w = windows_test.squeeze()[:, :-1] 
-y_test_w = windows_test.squeeze()[:, -1]
 
 ######################
 # SVM For Regression
@@ -555,8 +567,6 @@ with open("radial_basis_support_vector_classifier_search.pkl", "wb") as file:
 ######################
 # Neural Networks for Regression
 ######################
-
-
 from sklearn.neural_network import MLPRegressor
 from skopt import BayesSearchCV
 from sklearn.model_selection import TimeSeriesSplit
@@ -610,6 +620,41 @@ mlp_bs.fit(X_train_norm, y_train)
 # Save
 with open("Lesson 20 - Neural Networks for Classification/multilayer_perceptron_neural_network_bayes_search_cv.pkl", "wb") as file:
     pickle.dump(mlp_bs, file)
+
+
+######################
+# K Nearest Neighbors for Regression
+######################   
+
+# As applied to Timeseries
+from sklearn.preprocessing import sliding_window_view
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import TimeSeriesSplit
+from sklearn.neighbors import KNeighborsRegressor
+from skop import BayesSearchCV
+from sklearn.metrics import make_scorer, mean_squared_error
+
+w = 4
+knn = KNeighborsRegressor()
+
+params = {
+    "n_neighbors": [1, 3, 5, 7, 11, 15, 20],
+    "weights": ["distance", "uniform"],
+    "leaf_size": [1, 5, 10, 15, 20],
+    "metric": ["l2", "l1", "cosine"]
+}
+
+knn_bscv = BayesSearchCV(
+    knn, params,
+    cv=TimeSeriesSplit(n_plits=5, gap=w+1),
+    n_iter=5, 
+    scoring=make_scorer(mean_squared_error, greater_is_better=False),
+    refit=True, n_jobs=-1, random_state=0
+)
+
+# The training data is from a sliding window approach.
+# See sliding window for time series.
+knn_bscv.fit(X_train_w, y_train_w)
 
 ######################
 # Metrics
