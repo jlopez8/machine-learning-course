@@ -16,8 +16,13 @@ df.<CAT_VAR>.unique()
 df[<CAT_VAR>].value_counts() # counts how many values this cat var has.
 corr = df.corr() # correlation
 
-# Checking Values
+# Checking Nan Values
 df.isna().sum().sort_values(ascending=False)
+# Nans
+df.isna().sum()
+for c in df.columns:
+    if df[c].isna().sum() > 0:
+        print(c, data[c].isna().sum())
 
 # Categorial Columns / Values
 categorical_columns = list(df.dtypes[df.dtypes == "O"].index.values)
