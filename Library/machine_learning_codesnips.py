@@ -64,9 +64,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size= 0.33, rando
 # in the other data.
 text_train, text_test, labels_train, labels_test = train_test_split(text, labels, test_size=0.30, random_state=42, stratify=labels)
 
-
 ## Train, Test, Split for Time-Series / Sliding Windows
-
 # Time Series Windows
 from numpy.lib.stride_tricks import sliding_window_view
 from sklearn.preprocessing import MinMaxScaler
@@ -655,6 +653,29 @@ knn_bscv = BayesSearchCV(
 # The training data is from a sliding window approach.
 # See sliding window for time series.
 knn_bscv.fit(X_train_w, y_train_w)
+
+
+######################
+# K Nearest Neighbors for Classification
+######################   
+
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import GridSearchCV
+
+# Estimator
+knn = KNeighborsClassifier()
+
+# Params
+params = {
+    "n_neighbors": [1, 3, 5, 7, 11, 15],
+    "weights": ["distance", "uniform"],
+    "leaf_size": [1, 5, 10, 20, 30],
+    "metric": ["l2", "l1", "cosine"]
+}
+
+# Grid Search / Bayes Search CV
+knn_gscv = GridSearchCV(knn, params, cv=5, n_jobs=-1, refit=True)
+
 
 ######################
 # Metrics

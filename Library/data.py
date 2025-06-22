@@ -6,6 +6,8 @@ from pandas import DataFrame
 import csv
 from sklearn.preprocessing import MinMaxScaler
 
+
+
 def get_data(filename, rename_columns={}, remap={}, combinator={}, **kwargs):
     df = pd.read_csv(filename, index_col=kwargs.get("index_col", None))
     df.rename(columns=rename_columns, inplace=True)
